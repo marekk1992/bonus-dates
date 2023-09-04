@@ -2,24 +2,22 @@ package com.devbridge.bonusdate;
 
 import com.devbridge.bonusdate.error.InvalidYearException;
 
+import java.time.DateTimeException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 public class BonusDate {
+
+    private static final LocalDate NON_EXISTING_DATE = null;
 
     public static void printBonusDatesBetween(int fromYear, int toYear) {
         validateInput(fromYear, toYear);
         LocalDate startDate = LocalDate.of(fromYear, 1, 1);
         LocalDate endDate = LocalDate.of(toYear, 1, 1);
         List<LocalDate> datesBetween = startDate.datesUntil(endDate).toList();
-        List<LocalDate> suitableDates = new ArrayList<>();
-        datesBetween.forEach(date -> {
-            if (date.equals(reverseDate(date))) {
-                suitableDates.add(date);
-            }
-        });
-        suitableDates.forEach(System.out::println);
+        datesBetween.stream()
+                .filter(date -> date.equals(reverseDate(date)))
+                .forEach(System.out::println);
     }
 
     private static void validateInput(int fromYear, int toYear) {
@@ -37,22 +35,10 @@ public class BonusDate {
         int reversedMonth = Integer.parseInt(reversedDate.substring(4, 6));
         int reversedDay = Integer.parseInt(reversedDate.substring(6, 8));
 
-        if (isValidYear(reversedYear) && isValidMonth(reversedMonth) && isValidDay(reversedDay)) {
+        try {
             return LocalDate.of(reversedYear, reversedMonth, reversedDay);
-        } else {
-            return null;
+        } catch (DateTimeException e) {
+            return NON_EXISTING_DATE;
         }
-    }
-
-    private static boolean isValidYear(int year) {
-        return year / 1000 >= 1;
-    }
-
-    private static boolean isValidMonth(int month) {
-        return month >= 1 && month <= 12;
-    }
-
-    private static boolean isValidDay(int day) {
-        return day >= 1 && day <= 31;
     }
 }
